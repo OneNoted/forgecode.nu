@@ -40,7 +40,7 @@ jobs:
     steps:
       - name: Install Arch packaging tools
         run: pacman -Syu --noconfirm git namcap openssh rsync
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
           fetch-depth: 0
           ref: ${{ github.event_name == 'workflow_dispatch' && inputs.publish_ref || github.ref }}
@@ -73,15 +73,12 @@ jobs:
       (github.event_name == 'workflow_dispatch' && inputs.publish_git && inputs.publish_ref == 'refs/heads/main')
     needs: validate
     runs-on: ubuntu-latest
-    container: archlinux:base-devel
     env:
       AUR_SSH_PRIVATE_KEY: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
       AUR_PACKAGER_NAME: ${{ secrets.AUR_PACKAGER_NAME }}
       AUR_PACKAGER_EMAIL: ${{ secrets.AUR_PACKAGER_EMAIL }}
     steps:
-      - name: Install publish dependencies
-        run: pacman -Syu --noconfirm git openssh rsync
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
           fetch-depth: 0
           ref: ${{ github.event_name == 'workflow_dispatch' && inputs.publish_ref || github.ref }}
@@ -112,15 +109,12 @@ jobs:
       startsWith(inputs.release_tag, 'v')
     needs: validate
     runs-on: ubuntu-latest
-    container: archlinux:base-devel
     env:
       AUR_SSH_PRIVATE_KEY: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
       AUR_PACKAGER_NAME: ${{ secrets.AUR_PACKAGER_NAME }}
       AUR_PACKAGER_EMAIL: ${{ secrets.AUR_PACKAGER_EMAIL }}
     steps:
-      - name: Install publish dependencies
-        run: pacman -Syu --noconfirm git openssh rsync grep
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
           fetch-depth: 0
           ref: ${{ inputs.publish_ref }}
