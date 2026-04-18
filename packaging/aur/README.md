@@ -5,7 +5,7 @@ This directory is the source of truth for forgecode.nu AUR packages.
 Packages:
 
 - `forgecode-nu`: installs the tagged source release into Nushell's vendor autoload path.
-  Bump `pkgver`, update the source archive checksum, and regenerate `.SRCINFO` for each stable release.
+  Bump `pkgver`, create the GitHub release tag, update the source archive checksum from the published tarball, regenerate `.SRCINFO`, then publish from `main`.
 - `forgecode-nu-git`: packages the current git HEAD into the same Nushell autoload layout.
   Use this for tracking the moving development branch between tagged releases.
 
@@ -21,9 +21,10 @@ Both packages install:
 ## Publish flow
 
 1. Make sure the upstream repo URL in each `PKGBUILD` matches the actual published GitHub repo.
-2. For a stable tag, bump `packaging/aur/forgecode-nu/PKGBUILD`:
-   - `pkgver`
-   - release archive checksum in `sha256sums`
+2. For a stable release:
+   - bump `packaging/aur/forgecode-nu/PKGBUILD` `pkgver`
+   - create the matching GitHub release tag
+   - update the release archive checksum in `sha256sums` from the published tarball
 3. Regenerate `.SRCINFO` in each package directory:
 
    ```bash
@@ -46,7 +47,7 @@ The intended release path is GitHub-first:
 - tracked package metadata lives in `packaging/aur/`
 - `.github/workflows/aur.yml` validates PKGBUILDs and `.SRCINFO`
 - `forgecode-nu-git` can publish from `main` or manual dispatch
-- `forgecode-nu` publishes from a release tag or manual dispatch once its checksum is no longer `SKIP`
+- `forgecode-nu` publishes from manual dispatch on `main` after the matching release tag exists and its checksum is recorded in tracked metadata
 
 Required GitHub secrets:
 
