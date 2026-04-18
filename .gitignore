@@ -1,0 +1,4 @@
+.omx/
+.forge/
+__pycache__/
+*.pyc
