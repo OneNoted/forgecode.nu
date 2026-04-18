@@ -19,6 +19,11 @@ on:
         required: false
         default: false
         type: boolean
+      publish_ref:
+        description: Full git ref to publish (refs/heads/main or refs/tags/v*)
+        required: false
+        default: refs/heads/main
+        type: string
 
 permissions:
   contents: read
@@ -35,6 +40,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.publish_ref || github.ref }}
       - name: Trust checkout as a git safe.directory
         run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
       - name: Prepare non-root makepkg user
@@ -61,7 +67,7 @@ jobs:
   publish-git:
     if: >-
       (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
-      (github.event_name == 'workflow_dispatch' && inputs.publish_git)
+      (github.event_name == 'workflow_dispatch' && inputs.publish_git && inputs.publish_ref == 'refs/heads/main')
     needs: validate
     runs-on: ubuntu-latest
     container: archlinux:base-devel
@@ -75,6 +81,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.publish_ref || github.ref }}
       - name: Trust checkout as a git safe.directory
         run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
       - name: Verify AUR SSH key is configured
@@ -89,7 +96,7 @@ jobs:
           install -dm700 "$AUR_SSH_DIR"
           printf '%s\n' "$AUR_SSH_PRIVATE_KEY" > "$AUR_SSH_DIR/id_ed25519"
           chmod 600 "$AUR_SSH_DIR/id_ed25519"
-          ssh-keyscan -H aur.archlinux.org > "$AUR_SSH_DIR/known_hosts"
+          cp "$GITHUB_WORKSPACE/.github/aur_known_hosts" "$AUR_SSH_DIR/known_hosts"
           echo "GIT_SSH_COMMAND=ssh -i '$AUR_SSH_DIR/id_ed25519' -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile='$AUR_SSH_DIR/known_hosts'" >> "$GITHUB_ENV"
       - name: Publish forgecode-nu-git
         run: ./scripts/publish-aur-package.sh forgecode-nu-git ssh://aur@aur.archlinux.org/forgecode-nu-git.git
@@ -97,7 +104,7 @@ jobs:
   publish-stable:
     if: >-
       (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')) ||
-      (github.event_name == 'workflow_dispatch' && inputs.publish_stable)
+      (github.event_name == 'workflow_dispatch' && inputs.publish_stable && startsWith(inputs.publish_ref, 'refs/tags/v'))
     needs: validate
     runs-on: ubuntu-latest
     container: archlinux:base-devel
@@ -111,6 +118,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.publish_ref || github.ref }}
       - name: Trust checkout as a git safe.directory
         run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
       - name: Verify stable PKGBUILD is release-ready
@@ -131,7 +139,7 @@ jobs:
           install -dm700 "$AUR_SSH_DIR"
           printf '%s\n' "$AUR_SSH_PRIVATE_KEY" > "$AUR_SSH_DIR/id_ed25519"
           chmod 600 "$AUR_SSH_DIR/id_ed25519"
-          ssh-keyscan -H aur.archlinux.org > "$AUR_SSH_DIR/known_hosts"
+          cp "$GITHUB_WORKSPACE/.github/aur_known_hosts" "$AUR_SSH_DIR/known_hosts"
           echo "GIT_SSH_COMMAND=ssh -i '$AUR_SSH_DIR/id_ed25519' -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile='$AUR_SSH_DIR/known_hosts'" >> "$GITHUB_ENV"
       - name: Publish forgecode-nu
         run: ./scripts/publish-aur-package.sh forgecode-nu ssh://aur@aur.archlinux.org/forgecode-nu.git

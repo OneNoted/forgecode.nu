@@ -1,4 +1,7 @@
 .omx/
 .forge/
+.codex/
+\$\{XDG_CACHE_HOME\}/
+\$\{XDG_DATA_HOME\}/
 __pycache__/
 *.pyc
