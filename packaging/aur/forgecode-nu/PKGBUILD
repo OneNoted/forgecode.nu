@@ -13,7 +13,7 @@ conflicts=('forgecode-nu-git')
 source=(
   "https://github.com/OneNoted/forgecode.nu/archive/refs/tags/v${pkgver}.tar.gz"
 )
-sha256sums=('SKIP')
+sha256sums=('d60f527516882a148d305e12a451b8448187712cbee58aa65ad901ae34834993')
 
 package() {
   cd "${srcdir}/forgecode.nu-${pkgver}"
